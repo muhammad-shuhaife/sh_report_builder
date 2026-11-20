@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<templates xml:space="preserve">
+    <t t-name="sh_report_builder.FormNavigation" t-inherit="web.FormView.Buttons" t-inherit-mode="primary">
+        <xpath expr="//button[contains(@class, 'o_form_button_create')]" position="replace">
+            </xpath>
+        </t>
+    <t t-name="sh_report_builder.ListNavigation" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
+        <xpath expr="//button[contains(@class, 'o_list_button_add')]" position="replace">
+            </xpath>
+        </t>
+<t t-name="sh_report_builder.FormView" t-inherit="web.FormView" t-inherit-mode="primary"><xpath expr="//Layout" position="inside"><t t-set-slot="control-panel-navigation-additional"><div class="o_cp_switch_buttons d-inline-flex btn-group rb-report-view-switch" role="group" aria-label="Report views" t-if="!this.env.inDialog"><button type="button" class="btn btn-secondary o_switch_view" aria-label="List (Tree)" data-tooltip="List (Tree) view" t-on-click="this.openReportList"><i class="oi oi-fw" data-icon="reorder" aria-hidden="true"/></button><button type="button" class="btn btn-secondary o_switch_view" aria-label="Studio" data-tooltip="Studio view" t-on-click="this.openReportStudio"><i class="oi oi-fw" data-icon="oi_view-kanban" aria-hidden="true"/></button></div></t></xpath></t><t t-name="sh_report_builder.ListView" t-inherit="web.ListView" t-inherit-mode="primary"><xpath expr="//t[@t-set-slot='control-panel-navigation-additional']" position="inside"><div class="o_cp_switch_buttons d-inline-flex btn-group rb-report-view-switch" role="group" aria-label="Report views" t-if="!this.env.inDialog"><button type="button" class="btn btn-secondary o_switch_view active" aria-label="List (Tree)" data-tooltip="List (Tree) view" aria-pressed="true" aria-current="page"><i class="oi oi-fw" data-icon="reorder" aria-hidden="true"/></button><button type="button" class="btn btn-secondary o_switch_view" aria-label="Studio" data-tooltip="Studio view" t-on-click="this.openReportStudio"><i class="oi oi-fw" data-icon="oi_view-kanban" aria-hidden="true"/></button></div></xpath></t></templates>

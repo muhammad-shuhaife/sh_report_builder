@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<templates xml:space="preserve">
+    <t t-name="sh_report_builder.LivePreview">
+        <section class="rb-live-preview">
+            <div class="rb-live-preview-toolbar"><strong>Live report preview</strong><div class="d-flex align-items-center gap-2"><label class="d-flex align-items-center gap-1 small mb-0"><input type="checkbox" t-att-checked="this.state.enabled" t-on-change="this.toggle"/>Auto</label><button class="btn btn-sm btn-light" t-on-click="this.refresh" t-att-disabled="this.state.busy">Refresh</button></div></div>
+            <p class="small text-muted px-3 pt-2 mb-2" aria-live="polite" t-out="this.state.status"/>
+            <div t-if="this.state.error" class="alert alert-warning mx-3 small" role="alert" t-out="this.state.error"/>
+            <div t-if="this.state.paper" class="small text-muted px-3 pb-2"><strong><t t-out="this.state.paper.format"/> · <t t-out="this.state.paper.orientation"/> · <t t-out="this.state.paper.width"/> × <t t-out="this.state.paper.height"/> mm</strong><br/>Margins T/R/B/L: <t t-out="this.state.paper.margin_top"/> / <t t-out="this.state.paper.margin_right"/> / <t t-out="this.state.paper.margin_bottom"/> / <t t-out="this.state.paper.margin_left"/> mm</div>
+            <iframe t-if="this.state.viewerUrl" title="Live draft report" t-ref="this.viewer" class="rb-live-preview-frame" t-on-load="this.viewerLoaded" t-att-src="this.state.viewerUrl"/>
+            <div t-else="" class="p-4 text-muted text-center">Your PDF appears here as you edit.</div>
+            <p class="small text-muted px-3 py-2 mb-0">Rendered with the same PDF engine and paper settings as Preview PDF. Updates after a short pause. Block dialog changes appear after Save &amp; Close.</p>
+        </section>
+    </t>
+<t t-name="sh_report_builder.RangeField"><div class="rb-range-control"><input type="range" class="rb-range-track" t-att-min="this.minimum" t-att-max="this.maximum" step="1" t-att-value="this.state.value" t-att-disabled="this.props.readonly" t-att-aria-label="this.props.record.fields[this.props.name].string" t-att-style="'--rb-range-fill:' + this.state.value / this.maximum * 100 + '%'" t-on-input="this.input" t-on-change="this.commit" t-on-blur="this.commit" title="Drag to adjust; release to update the report"/><div class="rb-range-value"><input type="number" t-att-min="this.minimum" t-att-max="this.maximum" step="1" t-att-value="this.state.value" t-att-disabled="this.props.readonly" t-att-aria-label="this.props.record.fields[this.props.name].string + ' value'" t-on-input="this.input" t-on-change="this.commit" t-on-blur="this.commit"/><span aria-hidden="true">%</span></div></div></t></templates>

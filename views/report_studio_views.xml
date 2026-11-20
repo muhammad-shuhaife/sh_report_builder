@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="sh_report_builder_setup_form" model="ir.ui.view">
+        <field name="name">report.builder.setup.form</field><field name="model">report.builder.setup</field>
+        <field name="arch" type="xml">
+            <form string="Configure your report">
+                <group string="The essentials"><field name="name"/><field name="preset"/><field name="model_id" readonly="preset != 'custom'" options="{'no_create': True}"/><field name="start_content"/></group>
+                <group string="Design and branding"><field name="page_design"/><field name="line_design"/><field name="primary_color" widget="color"/><field name="branding"/></group>
+                <group string="Inside-page texture"><field name="body_design"/><field name="body_design_color" widget="color" invisible="body_design == 'none'"/><field name="body_design_opacity" invisible="body_design == 'none'" widget="sh_report_builder_range"/><field name="body_design_watermark" invisible="body_design != 'watermark'"/></group><group string="Paper format"><field name="paper_source"/><field name="existing_paperformat_id" invisible="paper_source != 'existing'" required="paper_source == 'existing'" options="{'no_create': True}"/></group>
+                <p class="text-muted">Only report types available in your installed apps are listed. The new report is created as a draft. Upload banners and adjust fields in the editor.</p>
+                <footer><button name="action_create_report" type="object" string="Create and open designer" class="btn-primary"/><button string="Cancel" special="cancel" class="btn-secondary"/></footer>
+            </form>
+        </field>
+    </record>
+    <record id="sh_report_builder_studio_action" model="ir.actions.client"><field name="name">Report Studio</field><field name="tag">sh_report_builder.studio</field></record>
+    <record id="sh_report_builder_designs_form" model="ir.ui.view">
+        <field name="name">report.builder.studio.options</field><field name="model">report.builder</field><field name="inherit_id" ref="sh_report_builder_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes"><attribute name="create">true</attribute><attribute name="js_class">sh_report_builder_form</attribute></xpath>
+            <xpath expr="//page[@name='style']" position="inside"><group string="Inside-page texture"><field name="body_design"/><field name="body_design_color" widget="color" invisible="body_design == 'none'"/><field name="body_design_opacity" invisible="body_design == 'none'" widget="sh_report_builder_range"/><field name="body_design_watermark" invisible="body_design != 'watermark'"/></group><group string="Gallery designs"><field name="page_design"/><field name="line_design"/><p class="text-muted">Page decorations apply to Custom layout, including uploaded banners. Selecting a page design switches the report to Custom layout. Page artwork is a light decorative layer within the existing header/footer. It does not change banner dimensions or paper margins. Table designs apply to table blocks. Save and Preview PDF or Apply Changes after editing.</p></group></xpath>
+        </field>
+    </record>
+    <record id="sh_report_builder_designs_list" model="ir.ui.view">
+        <field name="name">report.builder.list.studio</field><field name="model">report.builder</field><field name="inherit_id" ref="sh_report_builder_view_list"/>
+        <field name="arch" type="xml"><xpath expr="//list" position="attributes"><attribute name="create">true</attribute><attribute name="js_class">sh_report_builder_list</attribute></xpath></field>
+    </record>
+    <menuitem id="menu_sh_report_builder_designs" name="Report Studio" parent="menu_sh_report_builder_root" action="sh_report_builder_studio_action" groups="base.group_system" sequence="10"/>
+</odoo>

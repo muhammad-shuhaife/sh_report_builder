@@ -1,0 +1,350 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <!-- SEARCH -->
+    <record id="sh_report_builder_view_search" model="ir.ui.view">
+        <field name="name">report.builder.search</field>
+        <field name="model">report.builder</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="model_id"/>
+                <filter name="published" string="Published" domain="[('state', '=', 'published')]"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="group_model" string="Model" context="{'group_by': 'model_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- LIST -->
+    <record id="sh_report_builder_view_list" model="ir.ui.view">
+        <field name="name">report.builder.list</field>
+        <field name="model">report.builder</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="layout" optional="hide"/>
+                <field name="paper_format" optional="show"/>
+                <field name="block_count" string="Blocks"/>
+                <field name="state" widget="badge" decoration-success="state == 'published'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sh_report_builder_block_view_form" model="ir.ui.view">
+        <field name="name">report.builder.block.form</field>
+        <field name="model">report.builder.block</field>
+        <field name="arch" type="xml">
+                <form string="Block">
+                    <field name="model_name" invisible="1"/>
+                    <field name="source_model" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="zone" invisible="1"/>
+                            <field name="block_type"/>
+                            <field name="enabled"/>
+                        </group>
+                        <group>
+                            <field name="condition" placeholder="Always shown"/>
+                        </group>
+                    </group>
+
+                    <!-- text-like blocks -->
+                    <group string="Content" invisible="block_type not in ('heading', 'text', 'signature', 'twocol')">
+                        <field name="heading_level" invisible="block_type != 'heading'"/>
+                        <field name="show_logo" invisible="block_type != 'twocol'"/>
+                        <field name="text" colspan="2" nolabel="1" invisible="block_type == 'twocol' and show_logo" placeholder="Type here. Use {{field_name}} to insert a value, e.g. Dear {{partner_id.name}},"/>
+                        <field name="text_right" invisible="block_type != 'twocol'" colspan="2" placeholder="{{company.name}}&#10;{{company.phone}}"/>
+                    </group>
+
+                    <!-- field list / table / totals -->
+                    <group string="Settings" invisible="block_type not in ('fields', 'table')">
+                        <field name="columns" invisible="block_type != 'fields'"/>
+                        <field name="table_field_id" invisible="block_type != 'table'" required="block_type == 'table'" domain="[('model', '=', model_name), ('ttype', 'in', ['one2many', 'many2many'])]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="show_index" invisible="block_type != 'table'"/>
+                        <field name="striped" invisible="block_type != 'table'"/>
+                    </group>
+                    <separator string="Fields" invisible="block_type not in ('fields', 'table', 'totals') or (block_type == 'table' and not table_field_id)"/>
+                    <field name="item_ids" nolabel="1" invisible="block_type not in ('fields', 'table', 'totals') or (block_type == 'table' and not table_field_id)">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="source_model" column_invisible="1"/>
+                            <field name="field_relation" column_invisible="1"/>
+                            <field name="field_type" column_invisible="1"/>
+                            <field name="field_id" domain="[('model', '=', parent.source_model)]" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="sub_field_id" domain="[('model', '=', field_relation)]" invisible="field_type != 'many2one'" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="label" placeholder="Automatic"/>
+                            <field name="align" column_invisible="parent.block_type != 'table'"/>
+                            <field name="width" column_invisible="parent.block_type != 'table'"/>
+                            <field name="sum_total" column_invisible="parent.block_type != 'table'"/>
+                        </list>
+                    </field>
+
+                    <!-- image -->
+                    <group string="Image" invisible="block_type != 'image'">
+                        <field name="image_source" widget="radio"/>
+                        <field name="image" widget="image" options="{'size': [0, 120]}" invisible="image_source != 'static'"/>
+                        <field name="image_field_id" invisible="image_source != 'field'" domain="[('model', '=', model_name), ('ttype', '=', 'binary')]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="image_width"/>
+                    </group>
+
+                    <!-- spacing -->
+                    <group string="Size" invisible="block_type not in ('spacer', 'signature', 'twocol')">
+                        <field name="height" string="Height / Logo Height (px)"/>
+                    </group>
+
+                    <!-- code -->
+                    <group string="Custom QWeb" invisible="block_type != 'code'">
+                        <field name="code" colspan="2" nolabel="1" widget="ace" options="{'mode': 'xml'}" placeholder="&lt;p&gt;Printed by &lt;t t-out=&quot;user.name&quot;/&gt;&lt;/p&gt;"/>
+                    </group>
+
+                    <!-- style -->
+                    <group string="Style" invisible="block_type in ('pagebreak', 'spacer', 'code')">
+                        <group>
+                            <field name="align" invisible="block_type in ('table', 'signature', 'divider')"/>
+                            <field name="font_size" invisible="block_type in ('table', 'divider', 'image', 'signature')"/>
+                            <field name="bold" invisible="block_type in ('table', 'divider', 'image', 'signature')"/>
+                            <field name="border_bottom" invisible="block_type not in ('heading', 'text')"/>
+                        </group>
+                        <group>
+                            <field name="color" widget="color" invisible="block_type in ('table', 'image', 'signature')"/>
+                            <field name="background" widget="color" invisible="block_type in ('table', 'divider', 'image', 'signature')"/>
+                            <field name="margin_top"/>
+                            <field name="margin_bottom"/>
+                        </group>
+                    </group>
+                </form>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="sh_report_builder_view_form" model="ir.ui.view">
+        <field name="name">report.builder.form</field>
+        <field name="model">report.builder</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="active" invisible="1"/>
+                <field name="has_blocks" invisible="1"/>
+                <field name="model_name" invisible="1"/>
+                <header>
+                    <button name="action_publish" type="object" string="Publish to Print Menu" class="btn-primary" invisible="state == 'published' or not id"/>
+                    <button name="action_publish" type="object" string="Apply Changes" class="btn-primary" invisible="state == 'draft' or not id"/>
+                    <button name="action_load_starter" type="object" string="Load Starter Layout" invisible="has_blocks or not id"/>
+                    <button name="action_preview_html" type="object" string="Preview" invisible="not has_blocks"/>
+                    <button name="action_preview_pdf" type="object" string="Preview PDF" invisible="not has_blocks"/>
+                    <button name="action_download_pdf" type="object" string="Download PDF" invisible="not has_blocks"/><button name="action_unpublish" type="object" string="Unpublish" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Delivery Slip"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model_id" readonly="state == 'published'" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="layout"/>
+                        </group>
+                        <group>
+                            <field name="primary_color" widget="color"/>
+                        </group>
+                    </group>
+
+                    <div class="alert alert-info" role="alert" invisible="id">
+                        Choose what the report applies to, give it a name and save.
+                        You can then start adding blocks.
+                    </div>
+
+                    <notebook>
+                        <!-- DESIGN -->
+                        <page string="Design" name="design">
+                            <field name="block_ids" readonly="not id" nolabel="1" context="{'default_sequence': 100, 'default_zone': 'body'}">
+                                <list decoration-muted="not enabled">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="enabled" widget="boolean_toggle"/>
+                                    <field name="block_type" widget="badge"/>
+                                    <field name="summary" string="Content"/>
+                                </list>
+                            </field>
+                        </page>
+
+                        <!-- HEADER AND FOOTER -->
+                        <page string="Output &amp; Download" name="output">
+<group string="Downloaded PDF name"><field name="print_name" placeholder="e.g. Quotation {{name}} - {{partner_id.name}}"/><field name="download_name_preview" readonly="1"/><div class="text-muted" colspan="2">Use fields such as {{name}} or {{partner_id.name}}, plus {{report_name}} and {{date}}. The .pdf extension is added automatically. Preview PDF and Download PDF use this name.</div></group>
+<group string="Page numbers" invisible="layout == 'company'"><field name="page_number_display"/><field name="page_number_position" invisible="page_number_display in ['none', 'existing']"/><field name="page_number_inset" invisible="page_number_display in ['none', 'existing']"/><field name="page_number_size" invisible="page_number_display in ['none', 'existing']"/><div class="text-muted" colspan="2">Choose a position clear of banner artwork. Managed page numbers replace existing page-number text blocks. Odoo company layouts keep their standard numbering.</div></group>
+</page><page string="Header and Footer" name="headfoot">
+                            <group>
+                                <field name="layout" string="Header and footer style"/>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="layout == 'custom'">
+                                Choose Custom header &amp; footer above to upload your own images
+                                or build a design using editable blocks.
+                            </div>
+                            <div invisible="layout != 'custom'">
+                            <div class="alert alert-info" role="alert">
+                                Use a ready-made image, or design them with blocks. In text you can
+                                use <code>{{company.name}}</code>, <code>{{company.phone}}</code>,
+                                <code>{{company.email}}</code>, <code>{{page}}</code> and
+                                <code>{{topage}}</code>. If the header overlaps the body, raise
+                                Top margin in the Paper Format tab. Save your report before
+                                adding design blocks. Preview PDF to check the printed placement.
+                            </div>
+                            <group>
+                                <group string="Header">
+                                    <field name="header_mode" widget="radio"/>
+                                    <field name="header_repeat" invisible="header_mode == 'none'"/><button name="action_load_header" type="object" string="Start with a header template" class="btn-secondary" invisible="not id or header_mode != 'design' or header_block_ids"/>
+                                    <div class="text-muted" invisible="header_mode != 'image'">
+                                        Upload a wide PNG or JPG banner. It prints at full width with its original proportions.
+                                    </div>
+                                    <field name="header_image" widget="image" options="{'size': [0, 100]}" invisible="header_mode != 'image'"/>
+
+                                </group>
+                                <group string="Footer">
+                                    <field name="footer_mode" widget="radio"/>
+                                    <field name="footer_repeat" invisible="footer_mode == 'none'"/><button name="action_load_footer" type="object" string="Start with a footer template" class="btn-secondary" invisible="not id or footer_mode != 'design' or footer_block_ids"/>
+                                    <div class="text-muted" invisible="footer_mode != 'image'">
+                                        Upload a wide PNG or JPG banner. It prints at full width with its original proportions.
+                                    </div>
+                                    <field name="footer_image" widget="image" options="{'size': [0, 100]}" invisible="footer_mode != 'image'"/>
+
+                                </group>
+                            </group>
+                            <separator string="Header Design" invisible="header_mode != 'design'"/>
+                            <field name="header_block_ids" nolabel="1" readonly="not id" invisible="header_mode != 'design'" context="{'default_sequence': 100, 'default_zone': 'header'}">
+                                <list decoration-muted="not enabled">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="enabled" widget="boolean_toggle"/>
+                                    <field name="block_type" widget="badge"/>
+                                    <field name="summary" string="Content"/>
+                                </list>
+                            </field>
+                            <separator string="Footer Design" invisible="footer_mode != 'design'"/>
+                            <field name="footer_block_ids" nolabel="1" readonly="not id" invisible="footer_mode != 'design'" context="{'default_sequence': 100, 'default_zone': 'footer'}">
+                                <list decoration-muted="not enabled">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="enabled" widget="boolean_toggle"/>
+                                    <field name="block_type" widget="badge"/>
+                                    <field name="summary" string="Content"/>
+                                </list>
+                            </field>
+                            <div class="text-muted">
+                                Click a design row to edit it; drag its handle to reorder.
+                                Use Preview PDF above to check the result, then Apply Changes
+                                if the report is already published.
+                            </div>
+                            </div>
+                        </page>
+
+                        <!-- STYLE and PAGE -->
+                        <page string="Paper Format" name="paper_settings">
+                            <group>
+                                <field name="paper_format_source" widget="radio"/>
+                                <field name="existing_paperformat_id" invisible="paper_format_source != 'existing'" required="paper_format_source == 'existing'" options="{'no_create': True}"/>
+                            </group>
+                            <div class="alert alert-info" role="alert" invisible="paper_format_source != 'existing'">
+                                The selected format supplies the page size, orientation, margins and resolution.
+                                Its settings are copied for this report when you preview or apply changes.
+                                Automatic banner spacing adjusts this report's copy.
+                            </div>
+                            <group invisible="paper_format_source != 'custom'">
+                                <group string="Page">
+                                    <field name="paper_format"/>
+                                    <field name="orientation"/>
+                                </group>
+                                <group string="Margins (mm)">
+                                    <field name="margin_top"/>
+                                    <field name="margin_bottom"/>
+                                    <field name="margin_left"/>
+                                    <field name="margin_right"/>
+                                    <field name="header_spacing"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Style" name="style">
+                            <group>
+                                <group string="Typography">
+                                    <field name="font_family"/>
+                                    <field name="font_size"/>
+                                </group>
+
+                            </group>
+                            <group string="Report colours">
+                                <field name="use_custom_colors"/>
+                                <group invisible="not use_custom_colors">
+                                    <field name="text_color" widget="color"/>
+                                    <field name="heading_color" widget="color"/>
+                                    <field name="table_header_color" widget="color"/>
+                                    <field name="table_header_text_color" widget="color"/>
+                                    <field name="stripe_color" widget="color"/>
+                                    <field name="total_color" widget="color"/>
+                                    <field name="border_color" widget="color"/>
+                                </group>
+                            </group>
+                            <group string="Report body background">
+                                <field name="use_background_image"/>
+                                <field name="background_image" widget="image" options="{'size': [240, 120]}" invisible="not use_background_image"/>
+                                <field name="background_mode" invisible="not use_background_image"/><field name="background_fit" invisible="not use_background_image or background_mode == 'watermark'"/>
+                                <field name="background_opacity" invisible="not use_background_image" widget="sh_report_builder_range"/>
+                                <field name="background_saturation" widget="sh_report_builder_range" invisible="not use_background_image"/><field name="background_scale" invisible="not use_background_image or background_mode != 'watermark'" widget="sh_report_builder_range"/><field name="background_position" invisible="not use_background_image or background_mode != 'watermark'"/><div class="text-muted" colspan="2">Upload a logo or image and choose Watermark to centre a faint image behind the text and transparent table cells on every page. Start around 5–15% opacity, then adjust its width and position.</div>
+                            </group>
+                            <group string="Advanced">
+                                <field name="custom_css" widget="ace" options="{'mode': 'scss'}"/>
+                            </group>
+                        </page>
+
+                        <!-- PREVIEW -->
+                        <page string="Preview" name="preview">
+                            <group>
+                                <field name="preview_record_id" string="Sample Record" widget="many2one_reference"/>
+                            </group>
+                            <p class="text-muted">
+                                Save, then use the Preview / Preview PDF buttons above. The report is
+                                rendered with the sample record. Without one, the first record found
+                                is used. Previews never add the report to the Print menu.
+                            </p>
+                        </page>
+
+                        <!-- SOURCE -->
+                        <page string="Generated QWeb" name="source" groups="base.group_no_one">
+                            <p class="text-muted">
+                                Read-only. Refreshes after saving. Useful for debugging or for
+                                moving the design into a regular module.
+                            </p>
+                            <field name="generated_arch" widget="ace" options="{'mode': 'xml'}" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <aside class="rb-live-preview-aside"><field name="live_preview" widget="sh_report_builder_live_preview" nolabel="1" readonly="1"/></aside>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="sh_report_builder_action" model="ir.actions.act_window">
+        <field name="name">Report Designs</field>
+        <field name="res_model">report.builder</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="sh_report_builder_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Design your first report
+            </p>
+            <p>
+                Pick a model, stack headings, field lists, tables and totals,
+                then publish it to the Print menu in one click.
+            </p>
+        </field>
+    </record>
+
+    <!-- MENUS -->
+    <menuitem id="menu_sh_report_builder_root" name="Report Builder" web_icon="sh_report_builder,static/description/icon.png" groups="base.group_system" sequence="95"/>
+    <menuitem id="menu_sh_report_builder_designs" name="Report Designs" parent="menu_sh_report_builder_root" action="sh_report_builder_action" groups="base.group_system" sequence="10"/>
+
+</odoo>
