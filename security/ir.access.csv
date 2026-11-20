@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_sh_report_builder_admin,report.builder admin,report.builder,base.group_system,crud,
+access_sh_report_builder_block_admin,report.builder.block admin,report.builder.block,base.group_system,crud,
+access_sh_report_builder_item_admin,report.builder.item admin,report.builder.item,base.group_system,crud,
+access_sh_report_builder_setup_admin,report.builder.setup admin,report.builder.setup,base.group_system,crud,

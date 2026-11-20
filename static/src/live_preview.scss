@@ -1,0 +1,83 @@
+/* FormCompiler renders this aside as a sibling of o_form_sheet_bg.
+   Scope every width override to this report's preview, not other Odoo forms. */
+.o_form_renderer:has(> .rb-live-preview-aside) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.3fr) minmax(380px, 1fr);
+    gap: 18px;
+    align-items: start;
+    width: 100%;
+    max-width: none !important;
+    height: auto !important;
+}
+.o_form_renderer:has(> .rb-live-preview-aside) > .o_form_sheet_bg {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin-right: 0;
+    overflow: visible;
+}
+.o_form_renderer:has(> .rb-live-preview-aside) .o_form_sheet {
+    min-width: 0;
+    max-width: none;
+}
+.rb-live-preview-aside {
+    min-width: 0;
+    padding: 12px 18px 18px 0;
+    position: sticky;
+    top: 12px;
+}
+.rb-live-preview-aside .o_field_widget {
+    display: block;
+    width: 100%;
+}
+.rb-live-preview {
+    border: 1px solid #e1d8e8;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+.rb-live-preview .rb-live-preview-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 15px;
+    background: #f7f4fa;
+    border-bottom: 1px solid #e7dfed;
+}
+.rb-live-preview .rb-live-preview-frame {
+    display: block;
+    width: 100%;
+    height: calc(100vh - 230px);
+    min-height: 500px;
+    max-height: 900px;
+    border: 0;
+    background: white;
+}
+@media (max-width: 1099px) {
+    .o_form_renderer:has(> .rb-live-preview-aside) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .rb-live-preview-aside {
+        position: static;
+        padding: 0 12px 18px;
+    }
+}
+@media print {
+    .rb-live-preview-aside { display: none; }
+    .o_form_renderer:has(> .rb-live-preview-aside) { display: block !important; }
+}
+.rb-range-control { display:flex; align-items:center; gap:16px; width:100%; max-width:500px; min-width:0; padding:4px 0; }
+.rb-range-track {
+    appearance:none; -webkit-appearance:none; flex:1 1 auto; min-width:50px; width:100%; height:7px; margin:12px 0; padding:0; border:0; border-radius:8px; cursor:pointer;
+    background:linear-gradient(to right,#875a83 0%,#875a83 var(--rb-range-fill),#e8e3ec var(--rb-range-fill),#e8e3ec 100%);
+    &::-webkit-slider-thumb { appearance:none; -webkit-appearance:none; width:19px; height:19px; border:3px solid white; border-radius:50%; background:#875a83; box-shadow:0 1px 5px #51304f45; }
+    &::-moz-range-thumb { width:14px; height:14px; border:3px solid white; border-radius:50%; background:#875a83; box-shadow:0 1px 5px #51304f45; }
+    &:focus-visible { outline:3px solid #d9c5e4; outline-offset:6px; }
+    &:disabled { opacity:.5; cursor:default; }
+}
+.rb-range-value { display:flex; align-items:center; flex:0 0 83px; padding:5px 9px; border:1px solid #dfd6e5; border-radius:8px; background:#fff; color:#714b67; font-size:13px;
+    input { width:52px; min-width:0; border:0; outline:0; background:transparent; color:inherit; font-weight:600; padding:0; text-align:right; }
+    span { padding-left:5px; color:#89758f; } &:focus-within { border-color:#875a83; box-shadow:0 0 0 2px #875a8315; }
+}
